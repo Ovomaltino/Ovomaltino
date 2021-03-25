@@ -1,6 +1,7 @@
 import json
 from typing import List, Union
 from requests import request, Response
+from datatype.social_fact_type import SocialFactType
 
 
 class Database():
@@ -63,7 +64,7 @@ class Database():
         else:
             raise SystemError
 
-    def create(self, obj) -> Response:
+    def create(self, obj: Union[SocialFactType]) -> Response:
         """
         Insert a object in a collection
         :param obj: `list` List of objects
@@ -82,7 +83,7 @@ class Database():
         else:
             raise SystemError
 
-    def update(self, object_id: str, obj) -> Response:
+    def update(self, object_id: str, obj: Union[SocialFactType]) -> Response:
         """
         Update a object in a collection
         :param object_id: `str` ObjectId

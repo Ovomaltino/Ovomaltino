@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from database.database import Database
-from types.social_fact_type import SocialFactType
+from datatype.social_fact_type import SocialFactType
 from handler.mappers import to_social_fact
 
 

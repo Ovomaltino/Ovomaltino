@@ -94,7 +94,7 @@ class Database():
         head = {'Content-Type': 'application/json',
                 'cache-control': 'no-cache'}
 
-        response: Response = request('PUT', f'{self.endpoint}{str(object_id)}',
+        response: Response = request('PUT', f'{self.endpoint}/{str(object_id)}',
                                      data=json.dumps(obj), headers=head)
 
         if response.status_code is 200:

@@ -29,3 +29,39 @@ def create_new_learner(ovomaltino, leader_id) -> AgentType:
         'sanctions': [],
         'actions': 0
     }).json()))
+
+
+def upgrade_agent(ovomaltino, learner) -> Agent:
+
+    new_leader_values = {
+        'leader': True,
+        'becomeLeader': datetime.now().ctime()
+    }
+
+    new_leader = Agent(learner.data | new_leader_values)
+
+    ovomaltino.databases['agents'].update(
+        new_leader.data['_id'], new_leader.data
+    ).json()
+
+    create_new_learner(ovomaltino, new_leader.data['_id'])
+
+    return new_leader
+
+
+def check_agent(ovomaltino, agent: Agent) -> Agent:
+
+    if agent.data['life'] > 0:
+        return agent
+    else:
+        death_values = {'death': datetime.now().ctime(), 'leader': False}
+        agent.data = agent.data | death_values
+
+        ovomaltino.databases['agents'].update(
+            agent.data['_id'], agent.data
+        ).json()
+
+        return upgrade_agent(ovomaltino, Agent(to_agent(
+            ovomaltino.databases['agents'].get(
+                filters={'progenitor': agent.data['_id']}).json()[0]
+        )))

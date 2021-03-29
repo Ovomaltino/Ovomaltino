@@ -6,6 +6,7 @@ from classes.social_fact import SocialFact
 from database.database import Database
 from handler.mappers import to_social_fact, to_agent
 from handler.group_handler import create_new_group, fill_group
+from handler.agent_handler import check_agent
 
 
 def load_social_facts(ovomaltino) -> tp.NoReturn:
@@ -39,18 +40,24 @@ def load_groups(ovomaltino, num_groups: int) -> tp.NoReturn:
 
     try:
         res = ovomaltino.databases['agents'].get(
-            filters={'leader': True},
-            offset=0,
-            limit=num_groups
+            filters={'leader': True}, offset=0, limit=num_groups
         ).json()
 
         if len(res) == num_groups:
-            return [fill_group(ovomaltino, Agent(to_agent(x))) for x in res]
+            valid_agents = [check_agent(
+                ovomaltino, Agent(to_agent(x))) for x in res]
+            return [fill_group(ovomaltino, agent) for agent in valid_agents]
         else:
-            partial_groups = [fill_group(ovomaltino, Agent(to_agent(x)))
-                              for x in res]
+            valid_agents = [check_agent(ovomaltino,
+                                        Agent(to_agent(x)))
+                            for x in res]
+
+            partial_groups = [fill_group(ovomaltino, agent)
+                              for agent in valid_agents]
+
             new_groups = [create_new_group(ovomaltino)
                           for x in range(0, num_groups - len(res))]
+
             return op.add(partial_groups, new_groups)
 
     except:

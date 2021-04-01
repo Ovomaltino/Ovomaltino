@@ -23,7 +23,7 @@ def load_social_facts(ovomaltino) -> tp.NoReturn:
                 sf[1].register(dbs[sf[0]], {
                     'name': sf[1].name,
                     'moral': [],
-                    'sanction_level': sf[1].sanction
+                    'sanction_level': sf[1].sanction_level
                 })
 
         else:
@@ -44,12 +44,11 @@ def load_groups(ovomaltino, num_groups: int) -> tp.NoReturn:
         ).json()
 
         if len(res) == num_groups:
-            valid_agents = [check_agent(
-                ovomaltino, Agent(to_agent(x))) for x in res]
+            valid_agents = [check_agent(ovomaltino, Agent(to_agent(x)))
+                            for x in res]
             return [fill_group(ovomaltino, agent) for agent in valid_agents]
         else:
-            valid_agents = [check_agent(ovomaltino,
-                                        Agent(to_agent(x)))
+            valid_agents = [check_agent(ovomaltino, Agent(to_agent(x)))
                             for x in res]
 
             partial_groups = [fill_group(ovomaltino, agent)

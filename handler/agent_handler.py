@@ -1,12 +1,12 @@
+import random as r
 from datetime import datetime
-from classes.agent import Agent
 from datatype.agent_type import AgentType
 from handler.mappers import to_agent
 
 
 def create_new_leader(ovomaltino) -> AgentType:
 
-    return Agent(to_agent(ovomaltino.databases['agents'].create({
+    return to_agent(ovomaltino.databases['agents'].create({
         'birth': datetime.now().ctime(),
         'progenitor': "I'm the first one, guy",
         'leader': True,
@@ -15,12 +15,12 @@ def create_new_leader(ovomaltino) -> AgentType:
         'memory': [],
         'sanctions': [],
         'actions': 0
-    }).json()))
+    }).json())
 
 
 def create_new_learner(ovomaltino, leader_id) -> AgentType:
 
-    return Agent(to_agent(ovomaltino.databases['agents'].create({
+    return to_agent(ovomaltino.databases['agents'].create({
         'birth': datetime.now().ctime(),
         'progenitor': leader_id,
         'leader': False,
@@ -28,28 +28,27 @@ def create_new_learner(ovomaltino, leader_id) -> AgentType:
         'memory': [],
         'sanctions': [],
         'actions': 0
-    }).json()))
+    }).json())
 
 
-def upgrade_agent(ovomaltino, learner) -> Agent:
+def upgrade_agent(ovomaltino, learner):
 
     new_leader_values = {
         'leader': True,
         'becomeLeader': datetime.now().ctime()
     }
 
-    new_leader = Agent(learner.data | new_leader_values)
+    new_leader = learner.data | new_leader_values
 
     ovomaltino.databases['agents'].update(
-        new_leader.data['_id'], new_leader.data
+        new_leader['_id'], new_leader
     ).json()
 
-    create_new_learner(ovomaltino, new_leader.data['_id'])
-
+    create_new_learner(ovomaltino, new_leader['_id'])
     return new_leader
 
 
-def check_agent(ovomaltino, agent: Agent) -> Agent:
+def check_agent(ovomaltino, agent):
 
     if agent.data['life'] > 0:
         return agent
@@ -61,7 +60,53 @@ def check_agent(ovomaltino, agent: Agent) -> Agent:
             agent.data['_id'], agent.data
         ).json()
 
-        return upgrade_agent(ovomaltino, Agent(to_agent(
+        return upgrade_agent(ovomaltino, to_agent(
             ovomaltino.databases['agents'].get(
                 filters={'progenitor': agent.data['_id']}).json()[0]
-        )))
+        ))
+
+
+def get_sanction_level(agent, action):
+
+    sanction = list(filter(
+        lambda x: x if x['action'] == action else False,
+        agent.data['sanctions']
+    ))
+
+    if len(sanction) > 0 and sanction[0]['level'] > 0:
+        return sanction[0]['level'] / sum([x['level'] for x in agent.data['sanctions']])
+    else:
+        return 1
+
+
+def get_myself_data(agent, input_value, interactions):
+
+    memories = list(x['action'] for x in filter(
+        lambda x: x if x['inputValue'] == input_value else False,
+        agent.data['memory']
+    ))
+
+    if len(memories) > 0:
+        inputs = list(dict.fromkeys(memories))
+        outputs = list(len(list(filter(
+            lambda y: y == x,
+            memories
+        ))) for x in inputs)
+
+        memory_suggestion = inputs[outputs.index(max(outputs))]
+        memory_coersion = max(outputs) / sum(outputs)
+    else:
+        memory_suggestion = memory_coersion = None
+
+    intuition_suggestion = r.choice(interactions)
+    intuition_coersion = r.uniform(0, 1)
+
+    if memory_coersion is not None and memory_coersion / intuition_coersion > 1:
+        return [memory_suggestion, memory_coersion]
+    else:
+        return [intuition_suggestion, intuition_coersion]
+
+
+def closest(lst, K):
+
+    return lst[min(range(len(lst)), key=lambda i: abs(lst[i]-K))]

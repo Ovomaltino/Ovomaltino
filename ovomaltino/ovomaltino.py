@@ -128,7 +128,7 @@ class Ovomaltino():
         self.databases['educations'].update(self.education.data['_id'],
                                             self.education.data)
 
-    def consequences(self, value):
+    def consequence(self, value):
 
         def save():
 

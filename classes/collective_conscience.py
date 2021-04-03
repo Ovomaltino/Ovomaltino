@@ -30,7 +30,7 @@ class CollectiveConscience(SocialFact):
             ))) for x in inputs)
 
             suggestion = list(map(int, inputs[outputs.index(max(outputs))]))
-            coersion = max(outputs) / sum(outputs)
+            coersion = max(outputs) / len(self.data['moral'])
             return (suggestion, coersion)
         else:
             return None
@@ -47,8 +47,14 @@ class CollectiveConscience(SocialFact):
 
                 if len(check_sanction) > 0:
                     for sanction in iter(agent.data['sanctions']):
-                        if sanction['action'] == action and sanction['level'] > 0:
+                        if sanction['action'] == action and sanction['level'] > 0 and sanction['level'] - self.sanction_level > 0:
                             sanction['level'] -= self.sanction_level
+
+                        elif sanction['action'] == action and sanction['level'] > 0 and sanction['level'] - self.sanction_level < 0:
+                            sanction['level'] = 0
+
+                        else:
+                            pass
 
                 else:
                     pass

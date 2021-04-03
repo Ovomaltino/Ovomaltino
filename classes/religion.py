@@ -34,7 +34,7 @@ class Religion(SocialFact):
             ))) for x in inputs)
 
             suggestion = inputs[outputs.index(max(outputs))]
-            coersion = max(outputs) / sum(outputs)
+            coersion = max(outputs) / len(self.data['moral'])
             return (suggestion, coersion)
         else:
             return None

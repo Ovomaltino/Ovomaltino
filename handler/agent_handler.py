@@ -66,7 +66,7 @@ def check_agent(ovomaltino, agent):
         ))
 
 
-def get_sanction_level(agent, action):
+def get_sanction_level(agent, action, influence):
 
     sanction = list(filter(
         lambda x: x if x['action'] == action else False,
@@ -74,9 +74,18 @@ def get_sanction_level(agent, action):
     ))
 
     if len(sanction) > 0 and sanction[0]['level'] > 0:
-        return sanction[0]['level'] / sum([x['level'] for x in agent.data['sanctions']])
+        sanction_level = abs(sanction[0]['level'] / sum(
+            [x['level'] for x in agent.data['sanctions']]
+        ))
+
+        final_influence = sanction_level / influence
+        biggest_value = max([sanction_level, influence])
+        return [1, final_influence, action, biggest_value]
+
     else:
-        return 1
+        final_influence = influence
+        biggest_value = influence
+        return [2, final_influence, action, biggest_value]
 
 
 def get_myself_data(agent, input_value, interactions):
@@ -94,19 +103,22 @@ def get_myself_data(agent, input_value, interactions):
         ))) for x in inputs)
 
         memory_suggestion = inputs[outputs.index(max(outputs))]
-        memory_coersion = max(outputs) / sum(outputs)
-    else:
-        memory_suggestion = memory_coersion = None
-
-    intuition_suggestion = r.choice(interactions)
-    intuition_coersion = r.uniform(0, 1)
-
-    if memory_coersion is not None and memory_coersion / intuition_coersion > 1:
+        memory_coersion = max(outputs) / len(agent.data['memory'])
         return [memory_suggestion, memory_coersion]
     else:
-        return [intuition_suggestion, intuition_coersion]
+        return None
 
 
 def closest(lst, K):
 
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i]-K))]
+
+
+def order_influence(indexed_influence, field, C):
+
+    differ_list = list(map(
+        lambda x: [x[0], abs(C - x[1][field])],
+        indexed_influence
+    ))
+
+    return sorted(differ_list, key=lambda x: x[-1])

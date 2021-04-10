@@ -38,10 +38,11 @@ def calculate_action(ovomaltino, input_value, conscience_influence,
              ittls.repeat(actions)))
 
     # os fatos sociais aplicam ou removem sanções
-    list(map(lambda sf, agent, influence_value, action_value: sf.sanction(agent, influence_value, action_value),
+    list(map(lambda sf, agent, input_value, influence_value, action_value: sf.sanction(agent, input_value, influence_value, action_value),
              list([ovomaltino.conscience, ovomaltino.education,
                    ovomaltino.family, ovomaltino.religion]),
              ittls.repeat(list(x.leader for x in ovomaltino.groups)),
+             ittls.repeat(input_value),
              list([conscience_influence, education_influence,
                    family_influence, religion_influence]),
              ittls.repeat(actions)))

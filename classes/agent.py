@@ -15,7 +15,7 @@ class Agent():
                              conscience[1]] if conscience is not None else None
 
         intuition = [r.choice(interactions), r.uniform(0, 1)]
-        results = [get_sanction_level(self, x[0], x[1])
+        results = [get_sanction_level(self, input_value, x[0], x[1])
                    for x in [myself, intuition, religion, education, family, filter_conscience]
                    if x is not None]
 
@@ -61,19 +61,27 @@ class Agent():
                 indexed_influences
             ))[0][1]]
 
+            ret = action[0][2] if len(action) == 1 else action[r.choice(
+                range(0, len(action) - 1)
+            )][2]
+
         else:
             biggest_influence = max([x[1] for x in influences_2])
             action = list(filter(
                 lambda x: x[1] == biggest_influence, influences_2
             ))
 
+            ret = action[0][2] if len(action) == 1 else action[r.choice(
+                range(0, len(action) - 1)
+            )][2]
+
         self.data['memory'] = self.data['memory'] + [{
             'isLearner': False,
             'inputValue': input_value,
-            'action': action[0][2]
+            'action': ret
         }]
 
-        return action[0][2]
+        return ret
 
     def learn(self, leader, leader_action, education, input_value):
 

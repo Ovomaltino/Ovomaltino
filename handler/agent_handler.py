@@ -66,17 +66,18 @@ def check_agent(ovomaltino, agent):
         ))
 
 
-def get_sanction_level(agent, action, influence):
+def get_sanction_level(agent, input_value, action, influence):
 
     sanction = list(filter(
-        lambda x: x if x['action'] == action else False,
+        lambda x: x if x['action'] == action and x['input_value'] == input_value else False,
         agent.data['sanctions']
     ))
 
     if len(sanction) > 0 and sanction[0]['level'] > 0:
-        sanction_level = abs(sanction[0]['level'] / sum(
-            [x['level'] for x in agent.data['sanctions']]
-        ))
+        sanction_level = abs(sanction[0]['level'] / sum([
+            x['level'] for x in agent.data['sanctions']
+            if x['input_value'] == input_value
+        ]))
 
         final_influence = sanction_level / influence
         biggest_value = max([sanction_level, influence])
@@ -103,6 +104,7 @@ def get_myself_data(agent, input_value, interactions):
         ))) for x in inputs)
 
         memory_suggestion = inputs[outputs.index(max(outputs))]
+        # memory_coersion = max(outputs) / len(memories)
         memory_coersion = max(outputs) / len(agent.data['memory'])
         return [memory_suggestion, memory_coersion]
     else:

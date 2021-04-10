@@ -27,22 +27,22 @@ class SocialFact(ABC):
         except:
             return False
 
-    def sanction(self, agents, influence, actions):
+    def sanction(self, agents, input_value, influence, actions):
 
         def apply(agent, action):
 
             if influence[0] == action:
                 check_sanction = list(filter(
-                    lambda x: x['action'] == action,
+                    lambda x: x['action'] == action and x['input_value'] == input_value,
                     agent.data['sanctions']
                 ))
 
                 if len(check_sanction) > 0:
                     for sanction in iter(agent.data['sanctions']):
-                        if sanction['action'] == action and sanction['level'] > 0 and sanction['level'] - self.sanction_level > 0:
+                        if sanction['action'] == action and sanction['input_value'] == input_value and sanction['level'] > 0 and sanction['level'] - self.sanction_level > 0:
                             sanction['level'] -= self.sanction_level
 
-                        elif sanction['action'] == action and sanction['level'] > 0 and sanction['level'] - self.sanction_level < 0:
+                        elif sanction['action'] == action and sanction['input_value'] == input_value and sanction['level'] > 0 and sanction['level'] - self.sanction_level < 0:
                             sanction['level'] = 0
 
                         else:
@@ -53,16 +53,17 @@ class SocialFact(ABC):
 
             else:
                 check_sanction = list(filter(
-                    lambda x: x['action'] == action,
+                    lambda x: x['action'] == action and x['input_value'] == input_value,
                     agent.data['sanctions']
                 ))
 
                 if len(check_sanction) > 0:
                     for sanction in iter(agent.data['sanctions']):
-                        if sanction['action'] == action and sanction['level'] > 0:
+                        if sanction['action'] == action and sanction['input_value'] == input_value and sanction['level'] > 0:
                             sanction['level'] += self.sanction_level
                 else:
                     agent.data['sanctions'] = agent.data['sanctions'] + [{
+                        'input_value': input_value,
                         'action': action,
                         'level': self.sanction_level
                     }]

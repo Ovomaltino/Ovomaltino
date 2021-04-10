@@ -28,7 +28,7 @@ class Family(SocialFact):
             ))) for x in inputs)
 
             suggestion = inputs[outputs.index(max(outputs))]
-            coersion = max(outputs) / len(self.data['moral'])
+            coersion = max(outputs) / len(filter_list)
             return (suggestion, coersion)
         else:
             return None

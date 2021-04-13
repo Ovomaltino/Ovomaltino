@@ -2,7 +2,6 @@ import typing as tp
 import random as r
 from datetime import datetime
 from requests import request, Response
-from classes.independent_agent import IndependentAgent
 from classes.education import Education
 from classes.religion import Religion
 from classes.family import Family
@@ -10,9 +9,11 @@ from classes.agent import Agent
 from classes.collective_conscience import CollectiveConscience
 from database.database import Database
 from datatype.response_type import ResponseType
-from handler.ovomaltino_handler import load_social_facts, load_groups
+from datatype.agent_type import AgentType
+from handler.ovomaltino_handler import load_social_facts, load_groups, save
 from handler.group_handler import calculate_action
 from handler.mappers import to_agent
+from utils.list_functions import inputs_outputs
 
 
 class Ovomaltino():
@@ -27,7 +28,6 @@ class Ovomaltino():
                           'families': Database(self.url, 'families'),
                           'educations': Database(self.url, 'educations'),
                           'religions': Database(self.url, 'religions')}
-        self.iagent = IndependentAgent()
         self.conscience = CollectiveConscience('conscience', 3)
         self.family = Family('family', 1)
         self.education = Education('education', 1)
@@ -54,109 +54,65 @@ class Ovomaltino():
         else:
             return "Ovomaltino wasn't loaded yet"
 
-    def get_leaders(self):
+    def get_leaders(self) -> tp.List[Agent]:
 
         return list(map(lambda group: group.leader, self.groups))
 
-    def get_learners(self):
+    def get_learners(self) -> tp.List[Agent]:
 
         return list(map(lambda group: group.leader, self.groups))
 
-    def get_agent(self, agent_id):
+    def get_agent(self, agent_id) -> Agent:
 
         return Agent(to_agent(self.databases['agents'].get({'_id': agent_id}).json()[0]))
 
-    def process(self, input_value):
+    def process(self, input_value: tp.Any) -> tp.NoReturn:
 
         backup = self
-
-        def save():
-
-            self.databases['consciences'].update(self.conscience.data['_id'],
-                                                 self.conscience.data)
-
-            self.databases['families'].update(self.family.data['_id'],
-                                              self.family.data)
-
-            self.databases['educations'].update(self.education.data['_id'],
-                                                self.education.data)
-
-            self.databases['religions'].update(self.religion.data['_id'],
-                                               self.religion.data)
-
-            list(map(lambda x: self.databases['agents'].update(x.data['_id'], x.data), list(
-                x.leader for x in self.groups
-            )))
-
-            list(map(lambda x: self.databases['agents'].update(x.data['_id'], x.data), list(
-                x.learner for x in self.groups
-            )))
 
         def rollback():
             return backup
 
-        # os fatos sociais pegam a sua influencia
         education_influence = self.education.influence(input_value)
         religion_influence = self.religion.influence(input_value)
         family_influence = self.family.influence(input_value)
         conscience_influence = self.conscience.influence(input_value)
+        actions_suggestion = calculate_action(
+            self, input_value, conscience_influence,
+            education_influence, family_influence, religion_influence
+        )
 
-        # os lideres calculam a sua ação
-        actions_suggestion = calculate_action(self, input_value, conscience_influence,
-                                              education_influence, family_influence, religion_influence)
-
-        # verifica se há algum número em comum entre os valores passados
-        # se sim retorna o mesmo, senão escolhe aleatoriamente
-        inputs = list(dict.fromkeys(actions_suggestion))
-        outputs = list(len(list(filter(
-            lambda y: y == x,
+        [inputs, outputs] = inputs_outputs(actions_suggestion)
+        max_value = max(outputs)
+        action = list(set(list(filter(
+            lambda x: outputs[inputs.index(x)] == max_value,
             actions_suggestion
-        ))) for x in inputs)
+        ))))
 
-        if max(outputs) > 1:
-            return {'response': inputs[outputs.index(max(outputs))],
-                    'save': save,
-                    'rollback': rollback}
+        ret = action[0] if len(action) == 1 else action[r.choice(
+            range(0, len(action) - 1)
+        )]
 
-        else:
-            return {'response': r.choice(actions_suggestion),
-                    'save': save,
-                    'rollback': rollback}
+        return {'response': ret,
+                'save': lambda: save(self),
+                'rollback': rollback}
 
-    def observe(self, input_value, output_value, old_value, new_value):
+    def observe(self, input_value: tp.Any, output_value: tp.Any,
+                old_value: tp.Any, new_value: tp.Any) -> tp.NoReturn:
+
         self.education.shape(input_value, output_value, old_value, new_value)
-        self.databases['educations'].update(self.education.data['_id'],
-                                            self.education.data)
+        self.databases['educations'].update(
+            self.education.data['_id'],
+            self.education.data
+        )
 
-    def consequence(self, value):
+    def consequence(self, value: tp.Any) -> tp.Callable[[], tp.NoReturn]:
 
-        def save():
-
-            self.databases['consciences'].update(self.conscience.data['_id'],
-                                                 self.conscience.data)
-
-            self.databases['families'].update(self.family.data['_id'],
-                                              self.family.data)
-
-            self.databases['educations'].update(self.education.data['_id'],
-                                                self.education.data)
-
-            self.databases['religions'].update(self.religion.data['_id'],
-                                               self.religion.data)
-
-            list(map(lambda x: self.databases['agents'].update(x.data['_id'], x.data), list(
-                x.leader for x in self.groups
-            )))
-
-            list(map(lambda x: self.databases['agents'].update(x.data['_id'], x.data), list(
-                x.learner for x in self.groups
-            )))
-
-        def apply(agent):
+        def apply(agent: AgentType):
             agent.data['life'] += self.responses[value]['consequence']
 
         list(map(apply, list(x.leader for x in self.groups)))
-        return {'save': save}
+        return {'save': lambda: save(self)}
 
     def isconnected(self) -> bool:
 

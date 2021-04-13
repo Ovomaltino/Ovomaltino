@@ -1,7 +1,10 @@
+import typing as tp
 from abc import ABC, abstractmethod
 from database.database import Database
 from datatype.social_fact_type import SocialFactType
+from datatype.agent_type import AgentType
 from handler.mappers import to_social_fact
+from utils.influence_type import Influence
 
 
 class SocialFact(ABC):
@@ -27,9 +30,10 @@ class SocialFact(ABC):
         except:
             return False
 
-    def sanction(self, agents, input_value, influence, actions):
+    def sanction(self, agents: tp.List[AgentType], input_value: tp.Any,
+                 influence: Influence, actions: tp.List[tp.Any]) -> tp.NoReturn:
 
-        def apply(agent, action):
+        def apply(agent: AgentType, action: tp.Any) -> tp.NoReturn:
 
             if influence[0] == action:
                 check_sanction = list(filter(
@@ -53,18 +57,18 @@ class SocialFact(ABC):
 
             else:
                 check_sanction = list(filter(
-                    lambda x: x['action'] == action and x['input_value'] == input_value,
+                    lambda x: x['action'] == influence[0] and x['input_value'] == input_value,
                     agent.data['sanctions']
                 ))
 
                 if len(check_sanction) > 0:
                     for sanction in iter(agent.data['sanctions']):
-                        if sanction['action'] == action and sanction['input_value'] == input_value and sanction['level'] > 0:
+                        if sanction['action'] == influence[0] and sanction['input_value'] == input_value and sanction['level'] > 0:
                             sanction['level'] += self.sanction_level
                 else:
                     agent.data['sanctions'] = agent.data['sanctions'] + [{
                         'input_value': input_value,
-                        'action': action,
+                        'action': influence[0],
                         'level': self.sanction_level
                     }]
 
@@ -74,9 +78,9 @@ class SocialFact(ABC):
             pass
 
     @abstractmethod
-    def shape(self, input_value, output_value):
+    def shape(self, input_value: tp.Any, output_value: tp.Any) -> tp.NoReturn:
         pass
 
     @abstractmethod
-    def influence(self, input_value):
+    def influence(self, input_value: tp.Any):
         pass

@@ -1,7 +1,9 @@
 import random as r
+import typing as tp
 from datetime import datetime
 from datatype.agent_type import AgentType
 from handler.mappers import to_agent
+from utils.list_functions import inputs_outputs
 
 
 def create_new_leader(ovomaltino) -> AgentType:
@@ -18,7 +20,7 @@ def create_new_leader(ovomaltino) -> AgentType:
     }).json())
 
 
-def create_new_learner(ovomaltino, leader_id) -> AgentType:
+def create_new_learner(ovomaltino, leader_id: str) -> AgentType:
 
     return to_agent(ovomaltino.databases['agents'].create({
         'birth': datetime.now().ctime(),
@@ -31,7 +33,7 @@ def create_new_learner(ovomaltino, leader_id) -> AgentType:
     }).json())
 
 
-def upgrade_agent(ovomaltino, learner):
+def upgrade_agent(ovomaltino, learner: AgentType) -> AgentType:
 
     new_leader_values = {
         'leader': True,
@@ -39,7 +41,6 @@ def upgrade_agent(ovomaltino, learner):
     }
 
     new_leader = learner.data | new_leader_values
-
     ovomaltino.databases['agents'].update(
         new_leader['_id'], new_leader
     ).json()
@@ -48,25 +49,26 @@ def upgrade_agent(ovomaltino, learner):
     return new_leader
 
 
-def check_agent(ovomaltino, agent):
+def check_agent(ovomaltino, agent: AgentType) -> tp.Union[AgentType, tp.Callable]:
 
     if agent.data['life'] > 0:
         return agent
     else:
         death_values = {'death': datetime.now().ctime(), 'leader': False}
         agent.data = agent.data | death_values
-
         ovomaltino.databases['agents'].update(
             agent.data['_id'], agent.data
         ).json()
 
         return upgrade_agent(ovomaltino, to_agent(
             ovomaltino.databases['agents'].get(
-                filters={'progenitor': agent.data['_id']}).json()[0]
+                filters={'progenitor': agent.data['_id']}
+            ).json()[0]
         ))
 
 
-def get_sanction_level(agent, input_value, action, influence):
+def get_sanction_level(agent: AgentType, input_value: tp.Any, action: tp.Any,
+                       influence: tp.Tuple[tp.Any, float]) -> tp.Tuple[int, float, tp.Any, float]:
 
     sanction = list(filter(
         lambda x: x if x['action'] == action and x['input_value'] == input_value else False,
@@ -89,7 +91,9 @@ def get_sanction_level(agent, input_value, action, influence):
         return [2, final_influence, action, biggest_value]
 
 
-def get_myself_data(agent, input_value, interactions):
+def get_myself_data(agent: AgentType, input_value: tp.Any, interactions: tp.Any) -> tp.Union[
+        tp.Tuple[tp.Any, float],
+        None]:
 
     memories = list(x['action'] for x in filter(
         lambda x: x if x['inputValue'] == input_value else False,
@@ -97,26 +101,31 @@ def get_myself_data(agent, input_value, interactions):
     ))
 
     if len(memories) > 0:
-        inputs = list(dict.fromkeys(memories))
-        outputs = list(len(list(filter(
-            lambda y: y == x,
+        [inputs, outputs] = inputs_outputs(memories)
+        max_value = max(outputs)
+        action = list(set(list(filter(
+            lambda x: outputs[inputs.index(x)] == max_value,
             memories
-        ))) for x in inputs)
+        ))))
 
-        memory_suggestion = inputs[outputs.index(max(outputs))]
-        # memory_coersion = max(outputs) / len(memories)
-        memory_coersion = max(outputs) / len(agent.data['memory'])
+        ret = action[0] if len(action) == 1 else action[r.choice(
+            range(0, len(action) - 1)
+        )]
+
+        memory_suggestion = ret
+        memory_coersion = max_value / len(memories)
         return [memory_suggestion, memory_coersion]
+
     else:
         return None
 
 
-def closest(lst, K):
+def closest(lst: tp.List[tp.Any], K: float) -> tp.List[tp.Any]:
 
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i]-K))]
 
 
-def order_influence(indexed_influence, field, C):
+def order_influence(indexed_influence: tp.List, field: str, C: int) -> tp.Callable[[tp.List], tp.List]:
 
     differ_list = list(map(
         lambda x: [x[0], abs(C - x[1][field])],

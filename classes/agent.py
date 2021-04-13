@@ -1,18 +1,24 @@
+import typing as tp
 import operator as op
 import random as r
 from handler.agent_handler import get_myself_data, get_sanction_level, closest, order_influence
+from datatype.agent_type import AgentType
+from utils.influence_type import Influence
 
 
 class Agent():
 
-    def __init__(self, data):
+    def __init__(self, data: AgentType):
         self.data = data
 
-    def act(self, input_value, interactions, education, religion, conscience, family):
+    def act(self, input_value: tp.Any, interactions: tp.Any, education: Influence,
+            religion: Influence, conscience: Influence, family: Influence) -> tp.Any:
 
         myself = get_myself_data(self, input_value, interactions)
-        filter_conscience = [r.choice(conscience[0]),
-                             conscience[1]] if conscience is not None else None
+        filter_conscience = [
+            r.choice(conscience[0]),
+            conscience[1]
+        ] if conscience is not None else None
 
         intuition = [r.choice(interactions), r.uniform(0, 1)]
         results = [get_sanction_level(self, input_value, x[0], x[1])
@@ -23,21 +29,15 @@ class Agent():
         influences_2 = list(filter(lambda x: x[0] == 2, results))
 
         if len(influences_1) > 0:
-            # acrescenta uma coluna de index
-            # (0, [2, final_influence, action, biggest_value])
             indexed_influences = list(enumerate(influences_1))
-
-            # ordernar e enumerar por final_influence
-            # [0, abs(C - x[1][field])]
             sorted_final_influence = order_influence(
-                indexed_influences, 1, 1)
+                indexed_influences, 1, 1
+            )
 
-            # ordernar e enumerar por biggest_value
-            # [0, abs(C - x[1][field])]
             sorted_biggest_influence = order_influence(
-                indexed_influences, 3, 1)
+                indexed_influences, 3, 1
+            )
 
-            # para cada valor dentro de influences_1 eu somo a posição nas duas listas ordenadas
             sum_list = []
             for influence in iter(indexed_influences):
                 final_influence_position = list(filter(
@@ -54,8 +54,6 @@ class Agent():
                     final_influence_position, biggest_influence_position
                 ])]])
 
-            # a influencia com o somatório menor é a minha action
-            # pega a action do primeiro caso
             action = [list(filter(
                 lambda x: x[0] == sorted(sum_list, key=lambda x: x[-1])[0][0],
                 indexed_influences
@@ -85,8 +83,10 @@ class Agent():
 
     def learn(self, leader, leader_action, education, input_value):
 
-        leader_data = [leader_action, 1 - len(
-            self.data['memory']) / len(leader.data['memory'])]
+        leader_data = [
+            leader_action,
+            1 - len(self.data['memory']) / len(leader.data['memory'])
+        ]
 
         if education is None:
             self.data['memory'] = self.data['memory'] + [{
@@ -95,12 +95,20 @@ class Agent():
                 'action': leader_action
             }]
 
+        elif leader_data[1] / education[1] == 1:
+            self.data['memory'] = self.data['memory'] + [{
+                'isLearner': True,
+                'inputValue': input_value,
+                'action': r.choice([leader_action, education[0]])
+            }]
+
         elif leader_data[1] / education[1] > 1:
             self.data['memory'] = self.data['memory'] + [{
                 'isLearner': True,
                 'inputValue': input_value,
                 'action': leader_action
             }]
+
         else:
             self.data['memory'] = self.data['memory'] + [{
                 'isLearner': True,

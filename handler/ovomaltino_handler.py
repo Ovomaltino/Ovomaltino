@@ -1,3 +1,4 @@
+import random as r
 import operator as op
 import typing as tp
 from classes.groups import Group
@@ -61,3 +62,34 @@ def load_groups(ovomaltino, num_groups: int) -> tp.NoReturn:
 
     except:
         raise SystemError
+
+
+def save(ovomaltino) -> tp.NoReturn:
+
+    ovomaltino.databases['consciences'].update(
+        ovomaltino.conscience.data['_id'],
+        ovomaltino.conscience.data
+    )
+
+    ovomaltino.databases['families'].update(
+        ovomaltino.family.data['_id'],
+        ovomaltino.family.data
+    )
+
+    ovomaltino.databases['educations'].update(
+        ovomaltino.education.data['_id'],
+        ovomaltino.education.data
+    )
+
+    ovomaltino.databases['religions'].update(
+        ovomaltino.religion.data['_id'],
+        ovomaltino.religion.data
+    )
+
+    list(map(lambda x: ovomaltino.databases['agents'].update(x.data['_id'], x.data), list(
+        x.leader for x in ovomaltino.groups
+    )))
+
+    list(map(lambda x: ovomaltino.databases['agents'].update(x.data['_id'], x.data), list(
+        x.learner for x in ovomaltino.groups
+    )))

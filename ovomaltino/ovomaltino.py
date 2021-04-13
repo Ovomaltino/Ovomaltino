@@ -1,14 +1,19 @@
 import typing as tp
+import random as r
 from datetime import datetime
 from requests import request, Response
-from classes.independent_agent import IndependentAgent
 from classes.education import Education
 from classes.religion import Religion
 from classes.family import Family
+from classes.agent import Agent
 from classes.collective_conscience import CollectiveConscience
 from database.database import Database
 from datatype.response_type import ResponseType
-from handler.ovomaltino_handler import load_social_facts, load_groups
+from datatype.agent_type import AgentType
+from handler.ovomaltino_handler import load_social_facts, load_groups, save
+from handler.group_handler import calculate_action
+from handler.mappers import to_agent
+from utils.list_functions import inputs_outputs
 
 
 class Ovomaltino():
@@ -23,7 +28,6 @@ class Ovomaltino():
                           'families': Database(self.url, 'families'),
                           'educations': Database(self.url, 'educations'),
                           'religions': Database(self.url, 'religions')}
-        self.iagent = IndependentAgent()
         self.conscience = CollectiveConscience('conscience', 3)
         self.family = Family('family', 1)
         self.education = Education('education', 1)
@@ -37,17 +41,78 @@ class Ovomaltino():
             load_social_facts(self)
             self.groups = load_groups(self, num_groups)
             self.loadedAt = datetime.now().ctime()
+            self.num_groups = num_groups
+            self.interactions = interactions
+            self.responses = responses
         else:
             return "Can't connect in API"
 
-    def process(self):
-        pass
+    def reload(self) -> tp.NoReturn:
 
-    def observe(self):
-        pass
+        if self.loadedAt != False:
+            return self.load(self.num_groups, self.interactions, self.responses)
+        else:
+            return "Ovomaltino wasn't loaded yet"
 
-    def consequences(self):
-        pass
+    def get_leaders(self) -> tp.List[Agent]:
+
+        return list(map(lambda group: group.leader, self.groups))
+
+    def get_learners(self) -> tp.List[Agent]:
+
+        return list(map(lambda group: group.leader, self.groups))
+
+    def get_agent(self, agent_id) -> Agent:
+
+        return Agent(to_agent(self.databases['agents'].get({'_id': agent_id}).json()[0]))
+
+    def process(self, input_value: tp.Any) -> tp.NoReturn:
+
+        backup = self
+
+        def rollback():
+            return backup
+
+        education_influence = self.education.influence(input_value)
+        religion_influence = self.religion.influence(input_value)
+        family_influence = self.family.influence(input_value)
+        conscience_influence = self.conscience.influence(input_value)
+        actions_suggestion = calculate_action(
+            self, input_value, conscience_influence,
+            education_influence, family_influence, religion_influence
+        )
+
+        [inputs, outputs] = inputs_outputs(actions_suggestion)
+        max_value = max(outputs)
+        action = list(set(list(filter(
+            lambda x: outputs[inputs.index(x)] == max_value,
+            actions_suggestion
+        ))))
+
+        ret = action[0] if len(action) == 1 else action[r.choice(
+            range(0, len(action) - 1)
+        )]
+
+        return {'response': ret,
+                'save': lambda: save(self),
+                'rollback': rollback}
+
+    def observe(self, input_value: tp.Any, output_value: tp.Any,
+                old_value: tp.Any, new_value: tp.Any) -> tp.NoReturn:
+
+        self.education.shape(input_value, output_value, old_value, new_value)
+        self.databases['educations'].update(
+            self.education.data['_id'],
+            self.education.data
+        )
+
+    def consequence(self, value: tp.Any) -> tp.Callable[[], tp.NoReturn]:
+
+        def apply(agent: AgentType):
+            agent.data['life'] += self.responses[value]['consequence']
+
+        list(map(apply, list(x.leader for x in self.groups)))
+        return {'save': lambda: save(self)}
 
     def isconnected(self) -> bool:
 

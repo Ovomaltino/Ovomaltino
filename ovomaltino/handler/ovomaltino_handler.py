@@ -1,13 +1,13 @@
 import random as r
 import operator as op
 import typing as tp
-from classes.groups import Group
-from classes.agent import Agent
-from classes.social_fact import SocialFact
-from database.database import Database
-from handler.mappers import to_social_fact, to_agent
-from handler.group_handler import create_new_group, fill_group
-from handler.agent_handler import check_agent
+from ovomaltino.classes.groups import Group
+from ovomaltino.classes.agent import Agent
+from ovomaltino.classes.social_fact import SocialFact
+from ovomaltino.database.database import Database
+from ovomaltino.handler.mappers import to_social_fact, to_agent
+from ovomaltino.handler.group_handler import create_new_group, fill_group
+from ovomaltino.handler.agent_handler import check_agent
 
 
 def load_social_facts(ovomaltino) -> tp.NoReturn:

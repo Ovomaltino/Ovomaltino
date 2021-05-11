@@ -1,12 +1,12 @@
 import typing as tp
 import itertools as ittls
-from datatype.group_type import GroupType
-from datatype.agent_type import AgentType
-from classes.agent import Agent
-from classes.groups import Group
-from handler.mappers import to_agent
-from handler.agent_handler import create_new_leader, create_new_learner
-from utils.influence_type import Influence
+from ovomaltino.datatype.group_type import GroupType
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.classes.agent import Agent
+from ovomaltino.classes.groups import Group
+from ovomaltino.handler.mappers import to_agent
+from ovomaltino.handler.agent_handler import create_new_leader, create_new_learner
+from ovomaltino.utils.influence_type import Influence
 
 
 def create_new_group(ovomaltino) -> GroupType:

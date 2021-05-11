@@ -1,6 +1,6 @@
 from typing import TypedDict, Optional, List
-from datatype.agent_memory_type import Memory
-from datatype.sanction_type import Sanctions
+from ovomaltino.datatype.agent_memory_type import Memory
+from ovomaltino.datatype.sanction_type import Sanctions
 
 
 class AgentType(TypedDict):

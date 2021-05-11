@@ -1,7 +1,7 @@
 import json
 from typing import List, Union
 from requests import request, Response
-from datatype.social_fact_type import SocialFactType
+from ovomaltino.datatype.social_fact_type import SocialFactType
 
 
 class Database():

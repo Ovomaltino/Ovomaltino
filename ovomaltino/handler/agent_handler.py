@@ -1,9 +1,9 @@
 import random as r
 import typing as tp
 from datetime import datetime
-from datatype.agent_type import AgentType
-from handler.mappers import to_agent
-from utils.list_functions import inputs_outputs
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.handler.mappers import to_agent
+from ovomaltino.utils.list_functions import inputs_outputs
 
 
 def create_new_leader(ovomaltino) -> AgentType:

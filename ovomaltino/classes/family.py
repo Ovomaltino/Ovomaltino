@@ -1,23 +1,23 @@
 import random as r
 import typing as tp
 import operator as op
-from classes.social_fact import SocialFact
-from utils.list_functions import inputs_outputs
-from utils.influence_type import Influence
+from ovomaltino.classes.social_fact import SocialFact
+from ovomaltino.utils.list_functions import inputs_outputs
+from ovomaltino.utils.influence_type import Influence
 
 
-class Religion(SocialFact):
+class Family(SocialFact):
 
     def shape(self, input_value: tp.Any, output_value: tp.Any) -> tp.NoReturn:
 
-        [inputs, outputs] = inputs_outputs(output_value)
+        outputs = list(dict.fromkeys(output_value))
+        new_morals = list(map(
+            lambda out: {'inputValue': input_value, 'outputValue': out},
+            outputs
+        ))
 
-        for out in iter(outputs):
-            if out > 1:
-                new_moral = {'inputValue': input_value,
-                             'outputValue': inputs[outputs.index(out)]}
-
-                self.data['moral'] = op.add(self.data['moral'], [new_moral])
+        for moral in iter(new_morals):
+            self.data['moral'] = op.add(self.data['moral'], [moral])
 
     def influence(self, input_value: tp.Any) -> tp.Union[Influence, None]:
 
@@ -41,5 +41,6 @@ class Religion(SocialFact):
             suggestion = ret
             coersion = max_value / len(filter_list)
             return (suggestion, coersion)
+
         else:
             return None

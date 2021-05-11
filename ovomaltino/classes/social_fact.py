@@ -1,10 +1,10 @@
 import typing as tp
 from abc import ABC, abstractmethod
-from database.database import Database
-from datatype.social_fact_type import SocialFactType
-from datatype.agent_type import AgentType
-from handler.mappers import to_social_fact
-from utils.influence_type import Influence
+from ovomaltino.database.database import Database
+from ovomaltino.datatype.social_fact_type import SocialFactType
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.handler.mappers import to_social_fact
+from ovomaltino.utils.influence_type import Influence
 
 
 class SocialFact(ABC):

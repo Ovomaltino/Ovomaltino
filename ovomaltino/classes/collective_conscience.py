@@ -2,10 +2,10 @@ import operator as op
 import random as r
 import typing as tp
 import functools as ftls
-from classes.social_fact import SocialFact
-from datatype.agent_type import AgentType
-from utils.list_functions import inputs_outputs
-from utils.influence_type import Influence
+from ovomaltino.classes.social_fact import SocialFact
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.utils.list_functions import inputs_outputs
+from ovomaltino.utils.influence_type import Influence
 
 
 class CollectiveConscience(SocialFact):

@@ -1,4 +1,4 @@
-from datatype.agent_type import AgentType
+from ovomaltino.datatype.agent_type import AgentType
 
 
 class Group():

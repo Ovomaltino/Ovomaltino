@@ -13,14 +13,12 @@ pip install ovomaltino
 from ovomaltino.ovomaltino import Ovomaltino
 
 # Set API data
-mas = Ovomaltino("localhost",
-								3005,
-								"v1")
+mas = Ovomaltino("localhost", 3005, "v1")
 
 # Load Ovomaltino with interactions data
 mas.load(5, [0, 1, 2, 3, 4, 5, 6, 7, 8], {'WINNER': {'consequence': 0},
-														 'DRAW': {'consequence': 0},
-														 'LOSER': {'consequence': -1}})
+													 'DRAW': {'consequence': 0},
+													 'LOSER': {'consequence': -1}})
 
 # Passing data to the social fact Education
 mas.observe([-1,-1,-1,-1,-1,-1,-1,-1,-1], 4, 1, 0)

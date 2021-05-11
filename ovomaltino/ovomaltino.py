@@ -2,18 +2,18 @@ import typing as tp
 import random as r
 from datetime import datetime
 from requests import request, Response
-from classes.education import Education
-from classes.religion import Religion
-from classes.family import Family
-from classes.agent import Agent
-from classes.collective_conscience import CollectiveConscience
-from database.database import Database
-from datatype.response_type import ResponseType
-from datatype.agent_type import AgentType
-from handler.ovomaltino_handler import load_social_facts, load_groups, save
-from handler.group_handler import calculate_action
-from handler.mappers import to_agent
-from utils.list_functions import inputs_outputs
+from ovomaltino.classes.education import Education
+from ovomaltino.classes.religion import Religion
+from ovomaltino.classes.family import Family
+from ovomaltino.classes.agent import Agent
+from ovomaltino.classes.collective_conscience import CollectiveConscience
+from ovomaltino.database.database import Database
+from ovomaltino.datatype.response_type import ResponseType
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.handler.ovomaltino_handler import load_social_facts, load_groups, save
+from ovomaltino.handler.group_handler import calculate_action
+from ovomaltino.handler.mappers import to_agent
+from ovomaltino.utils.list_functions import inputs_outputs
 
 
 class Ovomaltino():

@@ -1,9 +1,9 @@
 import random as r
 import typing as tp
 import operator as op
-from classes.social_fact import SocialFact
-from utils.list_functions import inputs_outputs
-from utils.influence_type import Influence
+from ovomaltino.classes.social_fact import SocialFact
+from ovomaltino.utils.list_functions import inputs_outputs
+from ovomaltino.utils.influence_type import Influence
 
 
 class Education(SocialFact):

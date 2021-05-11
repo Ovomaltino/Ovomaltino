@@ -1,9 +1,9 @@
 import typing as tp
 import operator as op
 import random as r
-from handler.agent_handler import get_myself_data, get_sanction_level, closest, order_influence
-from datatype.agent_type import AgentType
-from utils.influence_type import Influence
+from ovomaltino.handler.agent_handler import get_myself_data, get_sanction_level, closest, order_influence
+from ovomaltino.datatype.agent_type import AgentType
+from ovomaltino.utils.influence_type import Influence
 
 
 class Agent():

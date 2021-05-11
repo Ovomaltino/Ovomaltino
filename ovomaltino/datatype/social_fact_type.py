@@ -1,5 +1,5 @@
 from typing import TypedDict, List
-from datatype.social_fact_moral_type import MoralType
+from ovomaltino.datatype.social_fact_moral_type import MoralType
 
 
 class SocialFactType(TypedDict):

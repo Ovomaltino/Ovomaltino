@@ -1,6 +1,6 @@
 from typing import List
-from datatype.social_fact_type import SocialFactType
-from datatype.agent_type import AgentType
+from ovomaltino.datatype.social_fact_type import SocialFactType
+from ovomaltino.datatype.agent_type import AgentType
 
 
 def to_social_fact(obj: dict) -> SocialFactType:

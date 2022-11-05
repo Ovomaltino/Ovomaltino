@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="Ovomaltino",
-    version="0.0.13",
+    version="0.0.15",
     author="Matheus Nobre Gomes",
     author_email="matt-gomes@live.com",
     description="Multi agent system using social theories",
